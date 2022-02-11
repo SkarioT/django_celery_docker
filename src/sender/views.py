@@ -1,8 +1,12 @@
 from pyexpat import model
 from django.shortcuts import render
 from rest_framework.generics import *
+
 from .models import Client
 from .serializator import *
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 
 
@@ -40,3 +44,13 @@ class Send_outUpdate (UpdateAPIView):
 class Send_outDelete (DestroyAPIView):
     queryset = Send_out.objects.all()
     serializer_class = Send_outSerializator
+
+class Message_Info_View(APIView):
+    def get(self,*args, **kwargs):
+        queryset = MessageInfo.objects.all().order_by("status")
+
+        # serializer_class = MessageInfoSerializator(queryset,many=True)
+        serializer_class = MessageInfoGROUPSerializator(queryset,many=True)
+
+ 
+        return Response(serializer_class.data)

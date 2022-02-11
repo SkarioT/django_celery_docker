@@ -32,6 +32,8 @@ urlpatterns = [
     path('api_v1/list_send/', views.Send_outView.as_view()),
     path('api_v1/create_send/',views.Send_outCreate.as_view()),
     path('api_v1/update_send/<int:pk>',views.Send_outUpdate.as_view()),
-    path('api_v1/delete_send/<int:pk>',views.Send_outDelete.as_view())
+    path('api_v1/delete_send/<int:pk>',views.Send_outDelete.as_view()),
+
+    path('api_v1/list_message/', views.Message_Info_View.as_view()),
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

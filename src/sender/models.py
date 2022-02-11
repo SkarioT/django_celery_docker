@@ -77,9 +77,10 @@ class MessageInfo (models.Model):
         auto_now=False,
         auto_now_add=True
     )
-    status = models.BooleanField(
+    status = models.CharField(
         verbose_name="статус отправки",
-        default=False
+        default='0',
+        max_length=100
     )
     send_out_id=models.ForeignKey(
         Send_out,
