@@ -28,12 +28,16 @@ class Client (models.Model):
     tz = models.CharField(
         default='3',
         null=True,
-        max_length=2,
+        max_length=3,
         validators=[MinLengthValidator(1)],
         verbose_name="Часовой пояс")
 
     def __str__(self):
-        return self.phone_number
+        return self.phone_number +"   "+ self.tag+"   "+ self.code
+
+
+def one_hours():
+    return timezone.now() + timezone.timedelta(hours=1)
 
 class Send_out (models.Model):
 
@@ -59,6 +63,7 @@ class Send_out (models.Model):
     )
     end=models.DateTimeField(
         verbose_name="дата и время завершения рассылки",
+        default=one_hours()
     )
 
 
@@ -67,24 +72,24 @@ class Send_out (models.Model):
 
 class MessageInfo (models.Model):
     
-    create=models.DateField(
+    create=models.DateTimeField(
         verbose_name="Дата cоздания",
         auto_now=False,
         auto_now_add=True
     )
     status = models.BooleanField(
-        verbose_name="Сообщение доставлено",
+        verbose_name="статус отправки",
         default=False
     )
-    mailing_id=models.ForeignKey(
+    send_out_id=models.ForeignKey(
         Send_out,
         on_delete=models.CASCADE,
-        related_name='message_mailing'
+        related_name='message_send_out_id'
     )
     client_id=models.ForeignKey(
         Client,
         on_delete=models.CASCADE,
-        related_name="message_client"
+        related_name="message_client_id"
     )
     def __str__(self):
         return f"Дата создания {self.create}  Статус доставки: {self.status}"

@@ -22,9 +22,16 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # CRUD_API client
     path('api_v1/list_client/', views.ClientView.as_view()),
     path('api_v1/create_client/',views.ClienCreate.as_view()),
     path('api_v1/update_client/<int:pk>',views.ClientUpdate.as_view()),
-    path('api_v1/delete_client/<int:pk>',views.ClientDelete.as_view())
+    path('api_v1/delete_client/<int:pk>',views.ClientDelete.as_view()),
+
+    # CRUD_API send_out
+    path('api_v1/list_send/', views.Send_outView.as_view()),
+    path('api_v1/create_send/',views.Send_outCreate.as_view()),
+    path('api_v1/update_send/<int:pk>',views.Send_outUpdate.as_view()),
+    path('api_v1/delete_send/<int:pk>',views.Send_outDelete.as_view())
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
