@@ -30,6 +30,9 @@ class ClientDelete (DestroyAPIView):
 
 # for Send out
 class Send_outView(ListAPIView):
+    """
+    Список всех рассылок
+    """
     queryset = Send_out.objects.all()
     serializer_class = Send_outSerializator
 
@@ -45,12 +48,18 @@ class Send_outDelete (DestroyAPIView):
     queryset = Send_out.objects.all()
     serializer_class = Send_outSerializator
 
-class Message_Info_View(APIView):
-    def get(self,*args, **kwargs):
-        queryset = MessageInfo.objects.all().order_by("status")
 
-        # serializer_class = MessageInfoSerializator(queryset,many=True)
-        serializer_class = MessageInfoGROUPSerializator(queryset,many=True)
+class Send_outDetails (RetrieveAPIView):
+    """
+    получения детальной статистики отправленных сообщений по конкретной рассылке
+    """
+    queryset = Send_out.objects.all()
+    serializer_class = Send_out_Details_Serializator
 
- 
-        return Response(serializer_class.data)
+
+class Message_Info_View(ListAPIView):
+    """
+    группировка всех сообщений по статусам
+    """
+    queryset = MessageInfo.objects.all()[:1]
+    serializer_class = MessageInfoGROUPSerializator

@@ -23,17 +23,27 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     # CRUD_API client
+    # +дополнительная информация  - вывод всех клиентов
     path('api_v1/list_client/', views.ClientView.as_view()),
+    #добавления нового клиента в справочник со всеми его атрибутами
     path('api_v1/create_client/',views.ClienCreate.as_view()),
+    #обновления данных атрибутов клиента
     path('api_v1/update_client/<int:pk>',views.ClientUpdate.as_view()),
+    #удаления клиента из справочника
     path('api_v1/delete_client/<int:pk>',views.ClientDelete.as_view()),
 
     # CRUD_API send_out
+    # +дополнительная информация  - вывод всех рассылок
     path('api_v1/list_send/', views.Send_outView.as_view()),
     path('api_v1/create_send/',views.Send_outCreate.as_view()),
+    #обновления атрибутов рассылки
     path('api_v1/update_send/<int:pk>',views.Send_outUpdate.as_view()),
+    #удаления рассылки
     path('api_v1/delete_send/<int:pk>',views.Send_outDelete.as_view()),
+    #получения детальной статистики отправленных сообщений по конкретной рассылке
+    path('api_v1/details_send/<int:pk>',views.Send_outDetails.as_view()),
 
-    path('api_v1/list_message/', views.Message_Info_View.as_view()),
+    #группировка по статусам, всех сообщений
+    path('api_v1/group_message_status/', views.Message_Info_View.as_view()),
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
