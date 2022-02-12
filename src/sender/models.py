@@ -1,4 +1,5 @@
 from django.db import models
+from django.forms import RegexField
 from django.utils import timezone
 
 from django.core.validators import MinLengthValidator
@@ -9,8 +10,8 @@ class Client (models.Model):
     phone_number = models.CharField(
         null=True,
         verbose_name="Телефон",
-        max_length=10,
-        validators=[MinLengthValidator(10)]
+        max_length=11,
+        validators=[MinLengthValidator(11)]
     )
 
     code = models.CharField(
@@ -77,10 +78,11 @@ class MessageInfo (models.Model):
         auto_now=False,
         auto_now_add=True
     )
-    status = models.CharField(
+    status = models.BooleanField(#CharField(
         verbose_name="статус отправки",
-        default='0',
-        max_length=100
+        default=False
+        # default='0',
+        # max_length=100
     )
     send_out_id=models.ForeignKey(
         Send_out,
