@@ -1,5 +1,3 @@
-from datetime import tzinfo
-from email import message
 from django.forms import SlugField, fields
 from rest_framework import serializers
 from .models import Client,Send_out,MessageInfo
@@ -14,10 +12,11 @@ class ClienSerializator(serializers.ModelSerializer):
         fields = '__all__'
 
 class Send_outSerializator(serializers.ModelSerializer):
-    
+    start_date_time = serializers.DateTimeField()
+    end = serializers.DateTimeField()
     class Meta:
         model = Send_out
-        fields = '__all__'
+        fields = 'start_date_time','filter_code','filter_tag','text_msg','end'
 
     def create(self, validated_data):
         print("validated_data:",validated_data)
@@ -32,6 +31,7 @@ class Send_outSerializator(serializers.ModelSerializer):
 
         )
         print("Send_out:\n",send)
+        
         
         #после создания рассылки сразу получаю информацию кому её необходимо сделать
         client = Client.objects.filter(code=validated_data.get('filter_code'),tag=validated_data.get('filter_tag'))
@@ -48,11 +48,12 @@ class Send_outSerializator(serializers.ModelSerializer):
                 client_id = clien_t
             )
             print("message_info:\n",message_info)
+           
         return send
 
 class Send_out_Details_Serializator(serializers.ModelSerializer):
-    send_out_list = serializers.SerializerMethodField()
-    def get_send_out_list(self, instance):
+    message_out_list = serializers.SerializerMethodField()
+    def get_message_out_list(self, instance):
         print('get_clien_list instance',instance)
         message_obj = MessageInfo.objects.filter(send_out_id = instance.id)
         return MessageInfoSerializator(message_obj, many=True).data
@@ -62,8 +63,9 @@ class Send_out_Details_Serializator(serializers.ModelSerializer):
 
 
 
-
 class MessageInfoSerializator(serializers.ModelSerializer):
+    send_out_id = serializers.SlugRelatedField(slug_field="text_msg",read_only=True)
+    client_id = serializers.SlugRelatedField(slug_field="phone_number",read_only=True)
     class Meta:
         model = MessageInfo
         fields = '__all__'
@@ -86,5 +88,36 @@ class MessageInfoGROUPSerializator(serializers.ModelSerializer):
         return MessageInfoSerializator(status, many=True).data
     
     class Meta:
-        model = Send_out
+        model = MessageInfo
+        # fields = '__all__'
         fields = 'group_True','group_False'
+
+
+class Send_out_stistic_Serializator(serializers.ModelSerializer):
+    msg_group_status_True_counter = serializers.SerializerMethodField()
+    msg_group_status_True_details = serializers.SerializerMethodField()
+    
+    msg_group_status_False_counter = serializers.SerializerMethodField()
+    msg_group_status_False_details   = serializers.SerializerMethodField()
+    
+
+    def get_msg_group_status_True_counter(self, instance):
+        counter = MessageInfo.objects.filter(status="1",send_out_id = instance.id).count()
+        return counter
+
+    def get_msg_group_status_False_counter(self, instance):
+        counter = MessageInfo.objects.filter(status="0",send_out_id = instance.id).count()
+        return counter
+
+
+    def get_msg_group_status_True_details(self, instance):
+        status = MessageInfo.objects.filter(status="1",send_out_id = instance.id)
+        return MessageInfoSerializator(status, many=True).data
+
+    def get_msg_group_status_False_details(self, instance):
+        status = MessageInfo.objects.filter(status="0",send_out_id = instance.id)
+        return MessageInfoSerializator(status, many=True).data
+
+    class Meta:
+        model = Send_out
+        fields = '__all__'

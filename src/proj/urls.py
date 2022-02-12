@@ -43,7 +43,10 @@ urlpatterns = [
     #получения детальной статистики отправленных сообщений по конкретной рассылке
     path('api_v1/details_send/<int:pk>',views.Send_outDetails.as_view()),
 
-    #группировка по статусам, всех сообщений
+    #группировка по статусам, ВСЕХ сообщений
     path('api_v1/group_message_status/', views.Message_Info_View.as_view()),
+    
+    #получения общей статистики по созданным рассылкам и количеству отправленных сообщений по ним с группировкой по статусам
+    path('api_v1/send_out_stistic/', views.Send_out_stistic_List.as_view()),
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -63,3 +63,10 @@ class Message_Info_View(ListAPIView):
     """
     queryset = MessageInfo.objects.all()[:1]
     serializer_class = MessageInfoGROUPSerializator
+
+class Send_out_stistic_List(ListAPIView):
+    """
+    получения общей статистики по созданным рассылкам и количеству отправленных сообщений по ним с группировкой по статусам
+    """
+    queryset = Send_out.objects.all()
+    serializer_class = Send_out_stistic_Serializator
