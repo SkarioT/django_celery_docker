@@ -1,12 +1,18 @@
-from pyexpat import model
-from django.shortcuts import render
-from rest_framework.generics import *
 
 from .models import Client
-from .serializator import *
 
+#__________django-rest_________
+from .serializator import *
+from rest_framework.generics import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
+#---------------------------------
+
+#_________celery____
+from datetime import datetime, timedelta
+from django_celery_beat.models import PeriodicTask, IntervalSchedule
+from . import tasks
+#------------------------
 
 
 
@@ -44,21 +50,6 @@ class Send_outUpdate (UpdateAPIView):
     queryset = Send_out.objects.all()
     serializer_class = Send_outSerializator
 
-    # def update(self, request, *args, **kwargs):
-    #     instance = self.get_object()
-    #     print("def update on Send_outUpdate",instance)
-    #     print("req_data:",request.data.get('start_date_time'))
-    #     instance.start_date_time = request.data.get("start_date_time")
-    #     instance.filter_code=request.data.get('filter_code'),
-    #     instance.filter_tag=request.data.get('filter_tag'),
-    #     instance.text_msg=request.data.get('text_msg'),
-    #     instance.end=request.data.get('end')
-    #     instance.save()
-    #     serializer = self.get_serializer(instance)
-    #     serializer.is_valid(raise_exception=True)
-    #     self.perform_update(serializer)
-    #     return Response(serializer.data)
-
 class Send_outDelete (DestroyAPIView):
     queryset = Send_out.objects.all()
     serializer_class = Send_outSerializator
@@ -87,3 +78,26 @@ class Send_out_stistic_List(ListAPIView):
     """
     queryset = Send_out.objects.all()
     serializer_class = Send_out_stistic_Serializator
+
+#__________________________________
+class CreatePeriodicTask(APIView):
+
+    def get(self, request, format=None):
+
+        schedule, created = IntervalSchedule.objects.get_or_create(
+            every=10,
+            period=IntervalSchedule.SECONDS,
+            )
+        old_cleaner = PeriodicTask.objects.all()
+        print("old_cleaner\n\n\n\n\n",old_cleaner)
+        old_cleaner.delete()
+        pt,createdd= PeriodicTask.objects.get_or_create(
+        interval=schedule,                  # we created this above.
+        name='Importing contacts',          # simply describes this periodic task.
+        task='sender.tasks.send_message',  # name of task.
+        expires=datetime.now() + timedelta(seconds=31)
+        )
+        print("pt_expires=",pt)
+        print("expires=datetime.utcnow() + timedelta(seconds=31)", datetime.utcnow() + timedelta(seconds=31))
+
+        return Response(datetime.utcnow() + timedelta(seconds=31))

@@ -49,4 +49,8 @@ urlpatterns = [
     #получения общей статистики по созданным рассылкам и количеству отправленных сообщений по ним с группировкой по статусам
     path('api_v1/send_out_stistic/', views.Send_out_stistic_List.as_view()),
 
+    #_____test_celery_per_____
+    path('create_per/',views.CreatePeriodicTask.as_view())
+    #--------------------------
+
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
