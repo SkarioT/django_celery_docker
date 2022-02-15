@@ -95,4 +95,4 @@ class MessageInfo (models.Model):
         related_name="message_client_id"
     )
     def __str__(self):
-        return f"Дата создания {self.create}  Статус доставки: {self.status}"
+        return f"id={self.id}  Дата создания {self.create}  Статус доставки: {self.status}"

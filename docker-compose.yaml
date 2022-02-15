@@ -12,7 +12,6 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./req:/app/src/req
       - ./db:/app/src/db
     command: [ "python3", "./src/manage.py", "runserver", "0.0.0.0:8000"]
   
@@ -21,7 +20,7 @@ services:
     build: 
       context: ./
     volumes:
-      - ./req:/app/src/req
+      - ./db:/app/src/db
     command: ['celery', '--workdir=./src', '-A', 'proj', 'worker', '-l', 'info']
 
   celery-beats:
@@ -30,6 +29,5 @@ services:
       context: ./
     volumes:
       - ./db:/app/src/db
-      - ./req:/app/src/req
     # command: [celery -A proj beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler]
     command: ['celery', '--workdir=./src', '-A', 'proj', 'beat', '-l', 'INFO','--scheduler','django_celery_beat.schedulers:DatabaseScheduler']

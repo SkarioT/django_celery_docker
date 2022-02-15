@@ -1,35 +1,45 @@
+from ast import arg
 from urllib import response
 import requests as r
-import random
-import time
 
 from celery import shared_task
-from django.conf import settings
 
 
+from sender.models import MessageInfo
 
 
 
 @shared_task
-def send_message():
-    randaome_name = random.randrange(70000000000,79999999999)
-    id = random.randint(1,99999)
-    URL_CREATE_MSG=f"http://192.168.0.107:8008/send/{id}"
-    EXAMPLE_CITY = {
+def send_message(id,phone,text):
+    URL_SEND_OUT_MSG=f"http://192.168.0.107:8008/send/{id}"
+    DATA = {
 
             "id": f"{id}",
-            "phone": f"{randaome_name}",
-            "text": f"Text for {randaome_name}",
+            "phone": f"{phone}",
+            "text": f"Text for {text}",
         }
 
-    print("Ссылка:\n",URL_CREATE_MSG)
-    print("data=\n",EXAMPLE_CITY)
-    resp = r.post(url=URL_CREATE_MSG,data=EXAMPLE_CITY)
-    f_n = str(resp.status_code)+"_"+str(randaome_name)
-    # print("f_n=",f_n)
-    file_name = settings.BASE_DIR / 'req' / f_n
-    # file_name = str(resp.status_code)+"_"+str(randaome_name)
-    with open(file_name,"w") as f:
-        f.write(str(EXAMPLE_CITY))
+    print("Ссылка:\n",URL_SEND_OUT_MSG)
+    print("data=\n",DATA)
+    try:
+        resp = r.post(url=URL_SEND_OUT_MSG,data=DATA)
+    except:
+        print("Проблемымы с соденинением")
+        return False
+
+    ok_resp = [200,201]
+    bad_resp = [500,404,400]
+    print("resp.status_code=",resp.status_code)
+    if resp.status_code in ok_resp:
+
+        # здесь заношу в базу ,исходя из прилетевшего номера ( ид рассылки) информацию по статусу
+        print("id после того как всё ок =",id)
+        msg_info_upd = MessageInfo.objects.filter(pk=id).update(status = True)
+        print("MessageInfo.objects.filter(pk=id)=",msg_info_upd)
+
+        print("всё ок, можно заносить в базу что всё ок")
+    if resp.status_code in bad_resp:
+        print(f"Всё плохо,  код ошибки = {resp.status_code}")
+
     return True
 

@@ -1,0 +1,3 @@
+POSTGRES_USER=sms-db-user
+POSTGRES_PASSWORD=sms-db-user-password
+POSTGRES_DB=sms-db

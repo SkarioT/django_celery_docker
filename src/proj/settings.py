@@ -15,6 +15,7 @@ from pathlib import Path
 from .auth_data import SECRET_KEY
 import pytz
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -85,6 +86,16 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': locals_auth.PG_NAME,
+#         'USER': locals_auth.PG_USER,
+#         'PASSWORD': locals_auth.PG_PASSWORD,
+#         'HOST': locals_auth.PG_HOST,
+#         'PORT': '', # default
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -129,3 +140,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CELERY_BROKER_URL = 'redis://redis:6379'
 CELERY_RESULT_BACKEND = 'redis://redis:6379'
+
+REST_FRAMEWORK = {
+  
+    'NON_FIELD_ERRORS_KEY': 'error',
+}

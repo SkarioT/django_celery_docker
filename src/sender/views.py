@@ -10,8 +10,9 @@ from rest_framework.response import Response
 
 #_________celery____
 from datetime import datetime, timedelta
-from django_celery_beat.models import PeriodicTask, IntervalSchedule
+from django_celery_beat.models import PeriodicTask, IntervalSchedule,ClockedSchedule
 from . import tasks
+import json
 #------------------------
 
 
@@ -43,9 +44,9 @@ class Send_outView(ListAPIView):
     serializer_class = Send_outSerializator
 
 class Send_outCreate (CreateAPIView):
-    queryset = Send_out.objects.all()
+    # queryset = Send_out.objects.all()
     serializer_class = Send_outSerializator
-
+    
 class Send_outUpdate (UpdateAPIView):
     queryset = Send_out.objects.all()
     serializer_class = Send_outSerializator
@@ -84,20 +85,37 @@ class CreatePeriodicTask(APIView):
 
     def get(self, request, format=None):
 
-        schedule, created = IntervalSchedule.objects.get_or_create(
-            every=10,
-            period=IntervalSchedule.SECONDS,
+        cdt = datetime.now()
+        clocked_,created = ClockedSchedule.objects.get_or_create(
+            clocked_time = cdt - timedelta(minutes=10)
             )
+
+        #получаю все имеющиеся периодики
         old_cleaner = PeriodicTask.objects.all()
         print("old_cleaner\n\n\n\n\n",old_cleaner)
+        # удаояю их
         old_cleaner.delete()
+
+
         pt,createdd= PeriodicTask.objects.get_or_create(
-        interval=schedule,                  # we created this above.
-        name='Importing contacts',          # simply describes this periodic task.
+        # interval=schedule,                  # we created this above.
+        clocked = clocked_,
+        name=f'Importing contacts ',          # simply describes this periodic task.
         task='sender.tasks.send_message',  # name of task.
-        expires=datetime.now() + timedelta(seconds=31)
+        expires=cdt + timedelta(seconds=31),
+        one_off=True,
+        args =[],
+        kwargs = json.dumps({ "id" :"97273",
+                "phone":"75795657229",
+                "text" : "Text for 75795657229"
+                })
         )
+
+
+        # utcnow - время в 0 utc,
+        #  если использовать просто now()
+        #   - то берём из системы и опираемся на его
         print("pt_expires=",pt)
         print("expires=datetime.utcnow() + timedelta(seconds=31)", datetime.utcnow() + timedelta(seconds=31))
 
-        return Response(datetime.utcnow() + timedelta(seconds=31))
+        return Response(datetime.utcnow() + timedelta(seconds=60))

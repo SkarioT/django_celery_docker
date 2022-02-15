@@ -1,11 +1,20 @@
-from turtle import update
-from django.forms import SlugField, fields
+
 from rest_framework import serializers
 from .models import Client,Send_out,MessageInfo
 from django.utils import timezone
-import datetime
 import pytz
 import re
+
+#_________celery____
+from datetime import datetime, timedelta
+from django_celery_beat.models import PeriodicTask,ClockedSchedule,IntervalSchedule
+from . import tasks
+import json
+#------------------------
+#__________django-rest_________
+from rest_framework.response import Response
+#---------------------------------
+
 
 
 #проверка на ввод российского номера
@@ -28,8 +37,19 @@ class Send_outSerializator(serializers.ModelSerializer):
         model = Send_out
         fields = 'pk','start_date_time','filter_code','filter_tag','text_msg','end'
 
+    #проверяю на дату создания
+    def validate(self, data):
+        if data['start_date_time'] >= data['end']:
+            raise serializers.ValidationError(f"The end date must be greater than the start date. end({data['end']}) <= start({data['start_date_time']})")
+        
+        print(data['filter_code'],data['filter_tag'])
+        client = Client.objects.filter(code=data['filter_code'],tag=data['filter_tag'])
+        if len(client)==0:
+            print("Ошибка, нет подходящих пользователей")
+            raise serializers.ValidationError(f"Don't find Client for conditions: filter_code = {data['filter_code']} & filter_tag = {data['filter_tag']} ")
+        return data
+
     def create(self, validated_data):
-        #создаю рассылку
         send = Send_out.objects.create(
             start_date_time=validated_data.get('start_date_time',None),
             filter_code=validated_data.get('filter_code',None),
@@ -38,26 +58,11 @@ class Send_outSerializator(serializers.ModelSerializer):
             end=validated_data.get('end',None),
 
         )
-        # print("send_time_new_obj",send.start_date_time)
+        
         #после создания рассылки сразу получаю информацию кому её необходимо сделать
         client = Client.objects.filter(code=validated_data.get('filter_code'),tag=validated_data.get('filter_tag'))
-        print("Find Client:\n",client)
-        print("Find Client LEN:\n",len(client))
-        # print(**validated_data)
-        # if len(client) == 0:
-            # return Send_out(**validated_data)
-
-
-        #добавить проверку, найдены ли вообще клиенты под такие параметры
-        #если нет - вернуть ошибку
-
-
-
         #клиентов подходящих под рассылку может быть >1
         for clien_t in client:
-            print("id:",clien_t.id)
-            print("phone:",clien_t.phone_number)
-            
             #для каждого клиента создаю сообщение
             ctz= str(clien_t.tz)
             if ctz.startswith("-"):
@@ -67,13 +72,47 @@ class Send_outSerializator(serializers.ModelSerializer):
                 ctz = ctz.replace('+','')
                 ptz=pytz.timezone(f'Etc/GMT-{ctz}')
             print("ptz=",ptz)
+            clinet_tz_start =send.start_date_time.astimezone(ptz)
+            # print("clinet_tz_start",clinet_tz_start)
+            clinet_tz_end =send.end.astimezone(ptz)
+             #clinet_tz_time время для отпраки клиенту с учётом его UTC
             message_info = MessageInfo.objects.create(
-                create = datetime.datetime.now(tz=ptz),
+                create = clinet_tz_start,
                 send_out_id = send,
                 client_id = clien_t
             )
-            print("message_info:\n",message_info)
-           
+            print("id сообщения=",message_info.id)
+            print("Номер телефона=",clien_t.phone_number)
+            print("Текст сообщения для рассылки:\n",send.text_msg)
+            print("дата начала рассылки",clinet_tz_start)
+            print("дата окончания рассылки",clinet_tz_end)
+            print("-"*20)
+
+            clocked_,created = ClockedSchedule.objects.get_or_create(
+                clocked_time = send.start_date_time
+            )
+            # schedule, created = IntervalSchedule.objects.get_or_create(
+            #     every=10,
+            #     period=IntervalSchedule.MICROSECONDS
+            # )
+
+            pt,createdd= PeriodicTask.objects.get_or_create(
+            clocked = clocked_,
+            # interval=schedule, 
+            name=f' {message_info.id} {clien_t.phone_number} ',          # simply describes this periodic task.
+            task='sender.tasks.send_message',  # name of task.
+            # start_time = clinet_tz_start,
+            expires=clinet_tz_end,
+            one_off=True,
+            enabled = True,
+            args =[],
+            kwargs = json.dumps({ "id" :f"{message_info.id}",
+                    "phone":f"{clien_t.phone_number}",
+                    "text" : f"{send.text_msg}"
+                    })
+            )
+            print("PT=",pt.id)
+
         return send
 
     def update(self,instance, validated_data):
@@ -115,7 +154,7 @@ class Send_outSerializator(serializers.ModelSerializer):
                 ptz=pytz.timezone(f'Etc/GMT-{ctz}')
             print("ptz=",ptz)
             message_info = MessageInfo.objects.filter(pk=clien_t.id).update_or_create(
-                create = datetime.datetime.now(tz=ptz),
+                create = datetime.now(tz=ptz),
                 send_out_id = instance,
                 client_id = clien_t
             )
