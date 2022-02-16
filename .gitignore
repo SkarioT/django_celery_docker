@@ -109,7 +109,6 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-# auth_data.py
 
 # Spyder project settings
 .spyderproject
@@ -128,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+# My data
+auth_data.py
+.pg-env
+/db
