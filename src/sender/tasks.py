@@ -23,6 +23,7 @@ def send_message(id,phone,text):
     print("data=\n",DATA)
     try:
         resp = r.post(url=URL_SEND_OUT_MSG,data=DATA)
+        print(resp)
     except:
         print("Проблемымы с соденинением")
         return False

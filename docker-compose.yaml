@@ -13,6 +13,7 @@ services:
       - "8000:8000"
     volumes:
       - ./db:/app/src/db
+
     command: [ "python3", "./src/manage.py", "runserver", "0.0.0.0:8000"]
   
   worker:
@@ -21,6 +22,7 @@ services:
       context: ./
     volumes:
       - ./db:/app/src/db
+      # - ./db:/var/lib/postgresql/data 
     command: ['celery', '--workdir=./src', '-A', 'proj', 'worker', '-l', 'info']
 
   celery-beats:
@@ -29,5 +31,13 @@ services:
       context: ./
     volumes:
       - ./db:/app/src/db
+      - ./db:/var/lib/postgresql/data 
     # command: [celery -A proj beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler]
     command: ['celery', '--workdir=./src', '-A', 'proj', 'beat', '-l', 'INFO','--scheduler','django_celery_beat.schedulers:DatabaseScheduler']
+    
+  postgresql-db:
+    restart: always
+    image: postgres
+    env_file: ./postgresql-db/.pg-env 
+    volumes:
+      - ./db:/var/lib/postgresql/data 

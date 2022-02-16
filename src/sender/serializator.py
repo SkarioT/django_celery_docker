@@ -101,7 +101,7 @@ class Send_outSerializator(serializers.ModelSerializer):
             # interval=schedule, 
             name=f' {message_info.id} {clien_t.phone_number} ',          # simply describes this periodic task.
             task='sender.tasks.send_message',  # name of task.
-            # start_time = clinet_tz_start,
+            start_time = clinet_tz_start,
             expires=clinet_tz_end,
             one_off=True,
             enabled = True,
