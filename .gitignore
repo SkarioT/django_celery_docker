@@ -132,5 +132,5 @@ dmypy.json
 # My data
 auth_data.py
 .pg-env
-/db
+# /db
 db/
