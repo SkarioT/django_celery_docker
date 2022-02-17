@@ -1,9 +1,13 @@
 version: '3.9'
 
 services:
-  redis:
-    image: redis
+
+  postgresql-db:
     restart: always
+    image: postgres
+    env_file: ./postgresql-db/.pg-env 
+    volumes:
+      - ./db:/var/lib/postgresql/data 
   
   webapp:
     restart: always
@@ -16,6 +20,10 @@ services:
 
     command: [ "python3", "./src/manage.py", "runserver", "0.0.0.0:8000"]
   
+  redis:
+    image: redis
+    restart: always
+    
   worker:
     restart: always
     build: 
@@ -34,9 +42,3 @@ services:
     # command: [celery -A proj beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler]
     command: ['celery', '--workdir=./src', '-A', 'proj', 'beat', '-l', 'INFO','--scheduler','django_celery_beat.schedulers:DatabaseScheduler']
     
-  postgresql-db:
-    restart: always
-    image: postgres
-    env_file: ./postgresql-db/.pg-env 
-    volumes:
-      - ./db:/var/lib/postgresql/data 
