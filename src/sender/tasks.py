@@ -1,9 +1,6 @@
-from ast import arg
-from urllib import response
+
 import requests as r
-
 from celery import shared_task
-
 
 from sender.models import MessageInfo
 
@@ -11,7 +8,7 @@ from sender.models import MessageInfo
 
 @shared_task
 def send_message(id,phone,text):
-    URL_SEND_OUT_MSG=f"http://192.168.0.107:8008/send/{id}"
+    URL_SEND_OUT_MSG = f"http://192.168.0.107:8008/send/{id}"
     DATA = {
 
             "id": f"{id}",
@@ -33,9 +30,9 @@ def send_message(id,phone,text):
     print("resp.status_code=",resp.status_code)
     if resp.status_code in ok_resp:
 
-        # здесь заношу в базу ,исходя из прилетевшего номера ( ид рассылки) информацию по статусу
+        # Если удаленный сервер ответил что всё ок = обновляю для каждого "ок" сообщения его статус
         print("id после того как всё ок =",id)
-        msg_info_upd = MessageInfo.objects.filter(pk=id).update(status = True)
+        msg_info_upd = MessageInfo.objects.filter(pk = id).update(status = True)
         print("MessageInfo.objects.filter(pk=id)=",msg_info_upd)
 
         print("всё ок, можно заносить в базу что всё ок")

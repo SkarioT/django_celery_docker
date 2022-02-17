@@ -9,5 +9,3 @@ from . import tasks
 import json
 #------------------------
 
-pd = PeriodicTask.objects.all()
-print(pd)

@@ -133,3 +133,4 @@ dmypy.json
 auth_data.py
 .pg-env
 /db
+db/

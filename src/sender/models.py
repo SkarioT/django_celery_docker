@@ -75,8 +75,8 @@ class MessageInfo (models.Model):
     
     create=models.DateTimeField(
         verbose_name="Дата cоздания",
-        auto_now=False,
-        auto_now_add=True
+        # auto_now=False,
+        # auto_now_add=True
     )
     status = models.BooleanField(#CharField(
         verbose_name="статус отправки",
@@ -95,4 +95,4 @@ class MessageInfo (models.Model):
         related_name="message_client_id"
     )
     def __str__(self):
-        return f"id={self.id}  Дата создания {self.create}  Статус доставки: {self.status}"
+        return f"SELD_ID={self.id} Phone={self.client_id.phone_number}  Дата создания {self.create}  Статус доставки: {self.status}"
