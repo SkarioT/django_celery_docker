@@ -17,7 +17,7 @@ services:
       - "8000:8000"
     volumes:
       - ./db:/app/src/db
-
+      # - ./templates:/app/src/templates
     command: [ "python3", "./src/manage.py", "runserver", "0.0.0.0:8000"]
   
   redis:
