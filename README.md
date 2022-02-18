@@ -2,7 +2,7 @@
 
 
 + Clone project
-`$ git clone https://gitlab.com/SkarioT/django_postgresql_celery_redis_docker.git`
+`$ git clone https://github.com/SkarioT/django_celery_docker.git`
 
 + Change directory:
 + `$cd django_postgresql_celery_redis_docker/`
