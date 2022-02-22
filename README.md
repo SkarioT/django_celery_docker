@@ -1,5 +1,6 @@
 An example of the implementation of the service for sending SMS to clients of various operators and time zones. With the ability to send messages, in accordance with the time zone of the client.
 Messages are sent via API to a remote SMS Gate.
+
 On Docker-compose:
  - Django + API (django rest framework)
  - selery-beats (for delayed sending)
